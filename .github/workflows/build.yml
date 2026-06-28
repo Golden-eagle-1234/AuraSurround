@@ -37,10 +37,9 @@ jobs:
       - name: Setup Gradle Wrapper
         run: |
           mkdir -p gradle/wrapper
-          # Force download fresh Gradle wrapper jar (this fixes the ClassNotFound error)
           echo "Downloading Gradle wrapper jar..."
           curl -sL --fail --retry 3 "https://raw.githubusercontent.com/gradle/gradle/v8.2.0/gradle/wrapper/gradle-wrapper.jar" \
-            -o gradle/wrapper/gradle-wrapper.jar || echo "⚠️ Wrapper download failed - check network"
+            -o gradle/wrapper/gradle-wrapper.jar || echo "⚠️ Wrapper download failed"
           chmod +x gradlew
           ls -lh gradle/wrapper/
           echo "Wrapper size: $(stat -c %s gradle/wrapper/gradle-wrapper.jar 2>/dev/null || echo 'unknown') bytes"
