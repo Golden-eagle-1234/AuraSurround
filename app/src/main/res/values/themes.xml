@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AuraSurround" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent_purple</item>
+        <item name="colorPrimaryVariant">@color/accent_purple</item>
+        <item name="colorOnPrimary">@color/text_primary</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">@color/bg_dark</item>
+        <item name="android:navigationBarColor">@color/bg_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="ModeChip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="chipBackgroundColor">@color/slider_inactive</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="chipStrokeColor">@color/accent_purple</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="PresetButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/accent_purple</item>
+        <item name="strokeColor">@color/accent_purple</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+</resources>

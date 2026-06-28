@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background -->
+    <path
+        android:fillColor="#0D0D12"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+
+    <!-- Outer ring -->
+    <path
+        android:strokeColor="#9B59FF"
+        android:strokeWidth="3"
+        android:fillColor="#00000000"
+        android:pathData="M54,20 A34,34 0 1,1 53.99,20 Z" />
+
+    <!-- Inner headphone arc left -->
+    <path
+        android:strokeColor="#9B59FF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M30,54 A24,24 0 0,1 78,54" />
+
+    <!-- Left ear cup -->
+    <path
+        android:fillColor="#9B59FF"
+        android:pathData="M26,52 Q22,52 22,56 L22,64 Q22,68 26,68 L32,68 L32,52 Z" />
+
+    <!-- Right ear cup -->
+    <path
+        android:fillColor="#9B59FF"
+        android:pathData="M82,52 Q86,52 86,56 L86,64 Q86,68 82,68 L76,68 L76,52 Z" />
+
+    <!-- Sound waves left -->
+    <path
+        android:strokeColor="#C49BFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M18,46 A10,10 0 0,0 18,74" />
+    <path
+        android:strokeColor="#9B59FF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M12,40 A18,18 0 0,0 12,80" />
+
+    <!-- Sound waves right -->
+    <path
+        android:strokeColor="#C49BFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M90,46 A10,10 0 0,1 90,74" />
+    <path
+        android:strokeColor="#9B59FF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M96,40 A18,18 0 0,1 96,80" />
+
+    <!-- Center dot -->
+    <path
+        android:fillColor="#9B59FF"
+        android:pathData="M54,50 A4,4 0 1,1 53.99,50 Z" />
+
+</vector>

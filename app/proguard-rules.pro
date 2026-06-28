@@ -1,0 +1,3 @@
+-keep class de.robv.android.xposed.** { *; }
+-keep class com.demon.aurasurround.hook.** { *; }
+-keepattributes *Annotation*

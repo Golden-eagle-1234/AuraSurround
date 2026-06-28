@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvAppName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AURA SURROUND"
+                android:textColor="@color/accent_purple"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.15" />
+
+            <TextView
+                android:id="@+id/tvSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="8D &amp; Surround Audio for All Apps"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:layout_marginTop="4dp" />
+
+            <!-- Module Status Badge -->
+            <TextView
+                android:id="@+id/tvModuleStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="● Checking..."
+                android:textColor="@color/accent_green"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_badge"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp" />
+        </LinearLayout>
+
+        <!-- Power Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="20dp">
+
+                <!-- Power glow -->
+                <FrameLayout
+                    android:layout_width="56dp"
+                    android:layout_height="56dp">
+
+                    <View
+                        android:id="@+id/ivPowerGlow"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_power_glow"
+                        android:visibility="invisible" />
+
+                    <View
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_power_ring" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="⏻"
+                        android:textSize="22sp"
+                        android:textColor="@color/accent_purple" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Audio Enhancement"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvPowerLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="OFF"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchMaster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/accent_purple"
+                    app:trackTint="@color/switch_track_selector" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Mode Selection Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/layoutControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EFFECT MODE"
+                    android:textColor="@color/text_label"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.12"
+                    android:layout_marginBottom="12dp" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip8D"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎧 8D"
+                        android:tag="8d"
+                        style="@style/ModeChip" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipConcert"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎼 Concert"
+                        android:tag="concert"
+                        style="@style/ModeChip" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipStadium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏟️ Stadium"
+                        android:tag="stadium"
+                        style="@style/ModeChip" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipCave"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🗿 Cave"
+                        android:tag="cave"
+                        style="@style/ModeChip" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSpatial"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔊 Spatial"
+                        android:tag="spatial"
+                        style="@style/ModeChip" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipCustom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚙️ Custom"
+                        android:tag="custom"
+                        style="@style/ModeChip" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- Mode description -->
+                <TextView
+                    android:id="@+id/tvModeDesc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/accent_purple_light"
+                    android:textSize="12sp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_mode_desc"
+                    android:padding="10dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Sliders Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AUDIO CONTROLS"
+                    android:textColor="@color/text_label"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.12"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Virtualizer -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="🌀 Surround Depth"
+                        android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:id="@+id/tvVirtualizerValue" android:layout_width="40dp"
+                        android:layout_height="wrap_content" android:text="80%"
+                        android:textColor="@color/accent_purple" android:textSize="13sp"
+                        android:gravity="end" />
+                </LinearLayout>
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderVirtualizer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0"
+                    android:valueTo="1000"
+                    android:stepSize="10"
+                    app:thumbColor="@color/accent_purple"
+                    app:trackColorActive="@color/accent_purple"
+                    app:trackColorInactive="@color/slider_inactive"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Reverb -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="🏛️ Reverb / Space"
+                        android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:id="@+id/tvReverbValue" android:layout_width="40dp"
+                        android:layout_height="wrap_content" android:text="50%"
+                        android:textColor="@color/accent_cyan" android:textSize="13sp"
+                        android:gravity="end" />
+                </LinearLayout>
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderReverb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0"
+                    android:valueTo="1000"
+                    android:stepSize="10"
+                    app:thumbColor="@color/accent_cyan"
+                    app:trackColorActive="@color/accent_cyan"
+                    app:trackColorInactive="@color/slider_inactive"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Bass Boost -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="🔈 Bass Boost"
+                        android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:id="@+id/tvBassValue" android:layout_width="40dp"
+                        android:layout_height="wrap_content" android:text="30%"
+                        android:textColor="@color/accent_orange" android:textSize="13sp"
+                        android:gravity="end" />
+                </LinearLayout>
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderBass"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0"
+                    android:valueTo="1000"
+                    android:stepSize="10"
+                    app:thumbColor="@color/accent_orange"
+                    app:trackColorActive="@color/accent_orange"
+                    app:trackColorInactive="@color/slider_inactive" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 8D Speed Card (only shown in 8D mode) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card8DSpeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/card_accent_bg"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="↻ 8D Rotation Speed"
+                        android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:id="@+id/tv8DSpeedValue" android:layout_width="40dp"
+                        android:layout_height="wrap_content" android:text="0.5x"
+                        android:textColor="@color/accent_purple" android:textSize="13sp"
+                        android:gravity="end" />
+                </LinearLayout>
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/slider8DSpeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:valueFrom="0.1"
+                    android:valueTo="2.0"
+                    android:stepSize="0.1"
+                    app:thumbColor="@color/accent_purple"
+                    app:trackColorActive="@color/accent_purple"
+                    app:trackColorInactive="@color/slider_inactive" />
+
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Slow = dreamy • Fast = energetic • 0.5x recommended"
+                    android:textColor="@color/text_secondary" android:textSize="11sp"
+                    android:layout_marginTop="6dp" android:gravity="center" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Presets Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="QUICK PRESETS"
+                    android:textColor="@color/text_label"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.12"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPreset8D"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="8D"
+                        android:layout_marginEnd="4dp"
+                        style="@style/PresetButton" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetConcert"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Concert"
+                        android:layout_marginEnd="4dp"
+                        style="@style/PresetButton" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetStadium"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Stadium"
+                        style="@style/PresetButton" />
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginTop="8dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetCave"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cave Echo"
+                        android:layout_marginEnd="4dp"
+                        style="@style/PresetButton" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetSpatial"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Spatial"
+                        style="@style/PresetButton" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Save Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Save &amp; Apply"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"
+            app:backgroundTint="@color/accent_purple"
+            app:cornerRadius="16dp" />
+
+    </LinearLayout>
+</ScrollView>

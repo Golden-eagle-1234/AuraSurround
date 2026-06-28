@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AuraSurround</string>
+    <string name="module_active">● Module Active</string>
+    <string name="module_inactive">● Module NOT Active — Enable in LSPosed</string>
+</resources>
