@@ -28,22 +28,22 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+            \~/.gradle/caches
+            \~/.gradle/wrapper
+          key: \( {{ runner.os }}-gradle- \){{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
       - name: Setup Gradle Wrapper
         run: |
-          # Download gradle-wrapper.jar if missing (not committed to repo)
-          if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Downloading gradle-wrapper.jar..."
-            curl -sL "https://raw.githubusercontent.com/gradle/gradle/v8.2.0/gradle/wrapper/gradle-wrapper.jar" \
-              -o gradle/wrapper/gradle-wrapper.jar
-          fi
+          mkdir -p gradle/wrapper
+          # Force download fresh Gradle wrapper jar (this fixes the ClassNotFound error)
+          echo "Downloading Gradle wrapper jar..."
+          curl -sL --fail --retry 3 "https://raw.githubusercontent.com/gradle/gradle/v8.2.0/gradle/wrapper/gradle-wrapper.jar" \
+            -o gradle/wrapper/gradle-wrapper.jar || echo "⚠️ Wrapper download failed - check network"
           chmod +x gradlew
           ls -lh gradle/wrapper/
+          echo "Wrapper size: $(stat -c %s gradle/wrapper/gradle-wrapper.jar 2>/dev/null || echo 'unknown') bytes"
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
