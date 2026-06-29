@@ -5,13 +5,19 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        // LSPosed official repository
+        maven { url 'https://maven.lsposed.org/releases' }
+        // Backup mirror
+        maven { url 'https://maven.aliyun.com/repository/public' }
     }
 }
+
 rootProject.name = "AuraSurround"
 include ':app'
