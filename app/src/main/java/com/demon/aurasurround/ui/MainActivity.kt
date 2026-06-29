@@ -30,9 +30,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkModuleActive() {
-        // If this method runs normally (not hooked), module is NOT active
-        binding.tvModuleStatus.text = "● Module NOT Active"
-        binding.tvModuleStatus.setTextColor(getColor(android.R.color.holo_red_light))
+    // This will be overridden by Xposed hook if module is active
+    binding.tvModuleStatus.text = "● Module NOT Active — Enable in LSPosed"
+    binding.tvModuleStatus.setTextColor(getColor(android.R.color.holo_red_light))
     }
 
     private fun setupUI() {
