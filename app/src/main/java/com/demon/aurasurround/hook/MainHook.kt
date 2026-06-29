@@ -156,7 +156,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val effectSet = createEffectChain(sessionId, prefs)
             if (effectSet != null) {
                 activeEffects[sessionId] = effectSet
-                XposedBridge.log("$TAG: Effects applied to session \( sessionId ( \){prefs.effectMode})")
+                XposedBridge.log("$TAG: Effects applied to session $sessionId (${prefs.effectMode})")
             }
         } catch (e: Throwable) {
             XposedBridge.log("$TAG: applyEffects error: ${e.message}")
