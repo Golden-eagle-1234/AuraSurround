@@ -48,11 +48,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        // Hook module status detection for the app itself
+        // Hook module status for UI detection
         if (lpparam.packageName == "com.demon.aurasurround") {
             hookModuleStatus(lpparam)
         }
-        // Hook AudioTrack everywhere
         hookAudioTrack(lpparam)
     }
 
@@ -67,8 +66,13 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         XposedBridge.log("$TAG: Module is ACTIVE - UI detection hooked!")
                         val activity = param.thisObject as android.app.Activity
                         try {
-                            val binding = XposedHelpers.getObjectField(activity, "binding")
-                            val tvStatus = XposedHelpers.callMethod(binding, "getTvModuleStatus") as android.widget.TextView
+                            val bindingField = activity.javaClass.getDeclaredField("binding")
+                            bindingField.isAccessible = true
+                            val binding = bindingField.get(activity)
+                            val tvStatusField = binding.javaClass.getDeclaredField("tvModuleStatus")
+                            tvStatusField.isAccessible = true
+                            val tvStatus = tvStatusField.get(binding) as android.widget.TextView
+
                             activity.runOnUiThread {
                                 tvStatus.text = "● Module Active"
                                 tvStatus.setTextColor(activity.getColor(android.R.color.holo_green_light))
@@ -130,7 +134,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
-    // ... (rest of the file remains same - applyEffects, createEffectChain, etc.)
     private fun applyEffects(audioTrack: AudioTrack, packageName: String) {
         try {
             val sessionId = audioTrack.audioSessionId
@@ -167,9 +170,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     setStrength(prefs.virtualizerStrength.toShort().coerceIn(0, 1000))
                     enabled = true
                 }
-            } catch (e: Exception) {
-                XposedBridge.log("$TAG: Virtualizer failed: ${e.message}"); null
-            }
+            } catch (e: Exception) { XposedBridge.log("$TAG: Virtualizer failed: ${e.message}"); null }
 
             val reverb = try {
                 PresetReverb(0, sessionId).apply {
@@ -183,9 +184,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     }
                     enabled = true
                 }
-            } catch (e: Exception) {
-                XposedBridge.log("$TAG: Reverb failed: ${e.message}"); null
-            }
+            } catch (e: Exception) { XposedBridge.log("$TAG: Reverb failed: ${e.message}"); null }
 
             val bassBoost = try {
                 BassBoost(0, sessionId).apply {
@@ -206,9 +205,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             } catch (e: Exception) { null }
 
             val panner = if (prefs.effectMode == AudioEffectPrefs.EffectMode.SURROUND_8D) {
-                try {
-                    AudioPanner(sessionId, prefs.rotationSpeed).also { it.start() }
-                } catch (e: Exception) { null }
+                try { AudioPanner(sessionId, prefs.rotationSpeed).also { it.start() } } catch (e: Exception) { null }
             } else null
 
             AudioEffectSet(virtualizer, reverb, bassBoost, equalizer, panner)
