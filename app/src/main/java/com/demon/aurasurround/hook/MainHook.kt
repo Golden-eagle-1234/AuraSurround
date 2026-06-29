@@ -224,6 +224,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val equalizer = try {
                 Equalizer(0, sessionId).apply {
                     val numBands = numberOfBands.toInt()
+                    val range = getBandLevelRange()  // ← Added parentheses
                     val range = getBandLevelRange
                     val minLevel = range[0]
                     val maxLevel = range[1]
