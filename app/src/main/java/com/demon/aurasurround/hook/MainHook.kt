@@ -220,12 +220,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 null 
             }
 
-            // Equalizer
+            // Equalizer - FIXED: Removed duplicate line
             val equalizer = try {
                 Equalizer(0, sessionId).apply {
                     val numBands = numberOfBands.toInt()
-                    val range = getBandLevelRange()  // ← Added parentheses
-                    val range = getBandLevelRange
+                    val range = getBandLevelRange()  // Only keep this line
                     val minLevel = range[0]
                     val maxLevel = range[1]
                     
