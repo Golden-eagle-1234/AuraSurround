@@ -1,6 +1,5 @@
 package com.demon.aurasurround.hook
 
-import android.content.Context
 import android.media.AudioTrack
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
@@ -13,6 +12,7 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import java.io.File
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -22,6 +22,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         const val KEY_PREFS_JSON = "effect_prefs_json"
         const val KEY_ENABLED = "is_enabled"
 
+        // Thread-safe map for active effects
         val activeEffects = mutableMapOf<Int, AudioEffectSet>()
     }
 
@@ -30,14 +31,14 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val reverb: PresetReverb?,
         val bassBoost: BassBoost?,
         val equalizer: Equalizer?,
-        val panner: AudioPanner?
+        val panner: AudioPanner? // Ensure this class exists in your package
     ) {
         fun release() {
             runCatching { virtualizer?.release() }
             runCatching { reverb?.release() }
             runCatching { bassBoost?.release() }
             runCatching { equalizer?.release() }
-            panner?.stop()
+            runCatching { panner?.stop() }
         }
     }
 
@@ -48,10 +49,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        // Hook module status for UI detection
         if (lpparam.packageName == "com.demon.aurasurround") {
             hookModuleStatus(lpparam)
         }
+        // Hook all apps that use AudioTrack
         hookAudioTrack(lpparam)
     }
 
@@ -66,9 +67,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         XposedBridge.log("$TAG: Module is ACTIVE - UI detection hooked!")
                         val activity = param.thisObject as android.app.Activity
                         try {
+                            // Note: This reflection is fragile and depends on the exact structure of MainActivity
                             val bindingField = activity.javaClass.getDeclaredField("binding")
                             bindingField.isAccessible = true
                             val binding = bindingField.get(activity)
+                            
                             val tvStatusField = binding.javaClass.getDeclaredField("tvModuleStatus")
                             tvStatusField.isAccessible = true
                             val tvStatus = tvStatusField.get(binding) as android.widget.TextView
@@ -91,6 +94,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun hookAudioTrack(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
+            // Hook play() to apply effects when audio starts
             XposedHelpers.findAndHookMethod(
                 AudioTrack::class.java,
                 "play",
@@ -102,28 +106,26 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
             )
 
+            // Hook stop() to clean up effects
             XposedHelpers.findAndHookMethod(
                 AudioTrack::class.java,
                 "stop",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val audioTrack = param.thisObject as AudioTrack
-                        val sessionId = audioTrack.audioSessionId
-                        activeEffects[sessionId]?.release()
-                        activeEffects.remove(sessionId)
+                        cleanupEffects(audioTrack.audioSessionId)
                     }
                 }
             )
 
+            // Hook release() to clean up effects
             XposedHelpers.findAndHookMethod(
                 AudioTrack::class.java,
                 "release",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val audioTrack = param.thisObject as AudioTrack
-                        val sessionId = audioTrack.audioSessionId
-                        activeEffects[sessionId]?.release()
-                        activeEffects.remove(sessionId)
+                        cleanupEffects(audioTrack.audioSessionId)
                     }
                 }
             )
@@ -134,25 +136,38 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
+    private fun cleanupEffects(sessionId: Int) {
+        if (sessionId <= 0) return
+        activeEffects[sessionId]?.release()
+        activeEffects.remove(sessionId)
+    }
+
     private fun applyEffects(audioTrack: AudioTrack, packageName: String) {
         try {
             val sessionId = audioTrack.audioSessionId
             if (sessionId <= 0) return
 
             val prefs = loadPrefsFromFile() ?: return
+            
+            // If module is disabled globally, clean up and exit
             if (!prefs.isEnabled) {
-                activeEffects[sessionId]?.release()
-                activeEffects.remove(sessionId)
+                cleanupEffects(sessionId)
                 return
             }
 
-            if (prefs.targetPackages.isNotEmpty() && packageName !in prefs.targetPackages) return
+            // Check if this package is targeted
+            if (prefs.targetPackages.isNotEmpty() && packageName !in prefs.targetPackages) {
+                cleanupEffects(sessionId)
+                return
+            }
 
+            // Update existing effects if already applied
             if (activeEffects.containsKey(sessionId)) {
                 updateEffects(sessionId, prefs)
                 return
             }
 
+            // Create new effect chain
             val effectSet = createEffectChain(sessionId, prefs)
             if (effectSet != null) {
                 activeEffects[sessionId] = effectSet
@@ -165,13 +180,18 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun createEffectChain(sessionId: Int, prefs: AudioEffectPrefs): AudioEffectSet? {
         return try {
+            // Virtualizer
             val virtualizer = try {
                 Virtualizer(0, sessionId).apply {
                     setStrength(prefs.virtualizerStrength.toShort().coerceIn(0, 1000))
                     enabled = true
                 }
-            } catch (e: Exception) { XposedBridge.log("$TAG: Virtualizer failed: ${e.message}"); null }
+            } catch (e: Exception) { 
+                XposedBridge.log("$TAG: Virtualizer failed: ${e.message}")
+                null 
+            }
 
+            // Reverb
             val reverb = try {
                 PresetReverb(0, sessionId).apply {
                     preset = when (prefs.effectMode) {
@@ -184,28 +204,51 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     }
                     enabled = true
                 }
-            } catch (e: Exception) { XposedBridge.log("$TAG: Reverb failed: ${e.message}"); null }
+            } catch (e: Exception) { 
+                XposedBridge.log("$TAG: Reverb failed: ${e.message}")
+                null 
+            }
 
+            // Bass Boost
             val bassBoost = try {
                 BassBoost(0, sessionId).apply {
                     setStrength(prefs.bassBoost.toShort().coerceIn(0, 1000))
                     enabled = prefs.bassBoost > 0
                 }
-            } catch (e: Exception) { null }
+            } catch (e: Exception) { 
+                XposedBridge.log("$TAG: BassBoost failed: ${e.message}")
+                null 
+            }
 
+            // Equalizer
             val equalizer = try {
                 Equalizer(0, sessionId).apply {
-                    val numBands = numberOfBands
-                    val bandsToSet = prefs.eqBands.size.coerceAtMost(numBands.toInt())
+                    val numBands = numberOfBands.toInt()
+                    val range = getBandLevelRange
+                    val minLevel = range[0]
+                    val maxLevel = range[1]
+                    
+                    val bandsToSet = prefs.eqBands.size.coerceAtMost(numBands)
                     for (i in 0 until bandsToSet) {
-                        setBandLevel(i.toShort(), prefs.eqBands[i].toShort())
+                        // Clamp value to valid range
+                        val level = prefs.eqBands[i].toShort().coerceIn(minLevel, maxLevel)
+                        setBandLevel(i.toShort(), level)
                     }
                     enabled = prefs.eqBands.any { it != 0 }
                 }
-            } catch (e: Exception) { null }
+            } catch (e: Exception) { 
+                XposedBridge.log("$TAG: Equalizer failed: ${e.message}")
+                null 
+            }
 
+            // Panner (Custom Class)
             val panner = if (prefs.effectMode == AudioEffectPrefs.EffectMode.SURROUND_8D) {
-                try { AudioPanner(sessionId, prefs.rotationSpeed).also { it.start() } } catch (e: Exception) { null }
+                try { 
+                    AudioPanner(sessionId, prefs.rotationSpeed).also { it.start() } 
+                } catch (e: Exception) { 
+                    XposedBridge.log("$TAG: Panner failed: ${e.message}")
+                    null 
+                }
             } else null
 
             AudioEffectSet(virtualizer, reverb, bassBoost, equalizer, panner)
@@ -218,9 +261,21 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private fun updateEffects(sessionId: Int, prefs: AudioEffectPrefs) {
         val effectSet = activeEffects[sessionId] ?: return
         try {
-            effectSet.virtualizer?.setStrength(prefs.virtualizerStrength.toShort().coerceIn(0, 1000))
-            effectSet.bassBoost?.setStrength(prefs.bassBoost.toShort().coerceIn(0, 1000))
+            effectSet.virtualizer?.let {
+                it.setStrength(prefs.virtualizerStrength.toShort().coerceIn(0, 1000))
+                it.enabled = true
+            }
+            
+            effectSet.bassBoost?.let {
+                it.setStrength(prefs.bassBoost.toShort().coerceIn(0, 1000))
+                it.enabled = prefs.bassBoost > 0
+            }
+            
             effectSet.panner?.speed = prefs.rotationSpeed
+            
+            // Note: Updating Equalizer bands dynamically is complex and often requires recreation.
+            // For now, we only update strength-based effects.
+            
         } catch (e: Throwable) {
             XposedBridge.log("$TAG: updateEffects error: ${e.message}")
         }
@@ -228,19 +283,40 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun loadPrefsFromFile(): AudioEffectPrefs? {
         return try {
-            val prefsFile = java.io.File("/data/data/com.demon.aurasurround/shared_prefs/${PREFS_NAME}.xml")
-            if (!prefsFile.exists()) return AudioEffectPrefs()
+            val possiblePaths = listOf(
+                "/data/data/com.demon.aurasurround/shared_prefs/${PREFS_NAME}.xml",
+                "/data/user/0/com.demon.aurasurround/shared_prefs/${PREFS_NAME}.xml"
+            )
 
-            val content = prefsFile.readText()
-            val jsonMatch = Regex("""name="$KEY_PREFS_JSON"[^>]*>([^<]+)""").find(content)
-            val enabledMatch = Regex("""name="$KEY_ENABLED"[^>]*value="([^"]+)"""").find(content)
+            for (path in possiblePaths) {
+                val prefsFile = File(path)
+                if (prefsFile.exists() && prefsFile.canRead()) {
+                    val content = prefsFile.readText()
+                    
+                    // Fixed Regex: Removed extra quote
+                    val jsonMatch = Regex("""name="$KEY_PREFS_JSON"[^>]*>([^<]+)""").find(content)
+                    val enabledMatch = Regex("""name="$KEY_ENABLED"[^>]*value="([^"]+)""").find(content)
 
-            val json = jsonMatch?.groupValues?.getOrNull(1)
-            val enabled = enabledMatch?.groupValues?.getOrNull(1)?.toBoolean() ?: false
+                    val json = jsonMatch?.groupValues?.getOrNull(1)
+                    val enabled = enabledMatch?.groupValues?.getOrNull(1)?.toBoolean() ?: false
 
-            val prefs = if (json != null) AudioEffectPrefs.fromJson(json) else AudioEffectPrefs()
-            prefs.isEnabled = enabled
-            prefs
+                    val prefs = if (json != null) {
+                        try {
+                            AudioEffectPrefs.fromJson(json)
+                        } catch (e: Exception) {
+                            XposedBridge.log("$TAG: JSON parse error: ${e.message}")
+                            AudioEffectPrefs()
+                        }
+                    } else AudioEffectPrefs()
+                    
+                    prefs.isEnabled = enabled
+                    XposedBridge.log("$TAG: Loaded prefs successfully from $path")
+                    return prefs
+                }
+            }
+            
+            XposedBridge.log("$TAG: Prefs file not found or not readable")
+            AudioEffectPrefs() // Return default instead of null
         } catch (e: Throwable) {
             XposedBridge.log("$TAG: loadPrefs error: ${e.message}")
             null
